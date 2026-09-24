@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#06080b">
+  <title>Ghostless · ¿Qué sabe la web de ti?</title>
+  <meta name="description" content="Descubre en vivo todo lo que cualquier web puede saber de tu navegador sin pedirte permiso. 100% en tu navegador: no se envía nada.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <noscript><link rel="stylesheet" href="css/noscript.css"></noscript>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Saltar al contenido</a>
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="./">
+        <img src="assets/favicon.svg" alt="" width="22" height="22">
+        <span>ghostless</span>
+      </a>
+      <span class="pill">100 % local · 0 peticiones</span>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <p class="eyebrow">Demo educativa de browser fingerprinting</p>
+      <h1 id="hero-title" class="glitch">
+        <span class="glitch-text">¿Qué sabe la web de ti?</span>
+        <span class="glitch-layer" aria-hidden="true">¿Qué sabe la web de ti?</span>
+        <span class="glitch-layer" aria-hidden="true">¿Qué sabe la web de ti?</span>
+      </h1>
+      <p class="tagline">Sin cookies. Sin permisos. Sin preguntar.</p>
+      <p class="lede">
+        Cualquier web puede leer decenas de datos de tu navegador en milisegundos y combinarlos en una
+        huella que te reconoce aunque borres las cookies. Pulsa el botón y míralo en directo.
+      </p>
+      <noscript>
+        <p class="noscript">Esta demo necesita JavaScript: todo el análisis ocurre dentro de tu navegador y nada sale de él.</p>
+      </noscript>
+      <button id="scan-btn" class="btn btn-scan" type="button">Escanéame</button>
+      <p class="hero-note">Todo ocurre en tu navegador: no se envía nada. Compruébalo en DevTools → Red.</p>
+    </section>
+
+    <section id="scan" class="scan wrap" aria-label="Escaneo en curso" hidden>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <span class="terminal-dot" aria-hidden="true"></span>
+          <span class="terminal-dot" aria-hidden="true"></span>
+          <span class="terminal-dot" aria-hidden="true"></span>
+          <span class="terminal-title">ghostless — escaneo</span>
+        </div>
+        <div class="terminal-body" data-terminal aria-hidden="true"></div>
+        <div class="progress" aria-hidden="true"><div class="progress-bar" data-progress-bar></div></div>
+        <div class="terminal-footer">
+          <span data-progress-count>0/0</span>
+          <button class="btn btn-small" type="button" data-skip>Saltar animación</button>
+        </div>
+      </div>
+      <p class="visually-hidden" aria-live="polite" data-scan-live></p>
+    </section>
+
+    <section id="results" class="results wrap" aria-labelledby="results-title" hidden>
+      <div class="results-head">
+        <div>
+          <p class="eyebrow">Resultado</p>
+          <h2 id="results-title" class="section-title" tabindex="-1">Esto es lo que cualquier web sabe de ti</h2>
+        </div>
+        <button id="rescan-btn" class="btn" type="button">Escanear de nuevo</button>
+      </div>
+
+      <div class="summary">
+        <article class="panel gauge-panel" aria-labelledby="score-title">
+          <h3 id="score-title" class="panel-title">Unicidad estimada</h3>
+          <div data-gauge></div>
+          <p class="level" data-level></p>
+          <p class="level-text" data-level-text></p>
+          <p class="one-in">Tu combinación la compartiría aproximadamente <strong data-one-in></strong>.</p>
+          <p class="disclaimer">
+            Estimación educativa basada en estudios públicos, no una medida real.
+            <button class="link-btn" type="button" data-open-how>¿Cómo se calcula esto?</button>
+          </p>
+        </article>
+
+        <article class="panel hash-panel" aria-labelledby="hash-title">
+          <h3 id="hash-title" class="panel-title">Tu huella digital</h3>
+          <p class="hash" data-hash></p>
+          <div class="hash-actions">
+            <button class="btn btn-small" type="button" data-copy>Copiar hash</button>
+            <button class="btn btn-small" type="button" data-share>Tarjeta para compartir</button>
+            <span class="copy-status" data-copy-status aria-live="polite"></span>
+          </div>
+          <p class="hash-note">
+            SHA-256 de las <span data-stable-count></span> señales estables. Recarga la página y saldrá el mismo:
+            un tracker podría usarlo como tu «matrícula» sin guardar ni una cookie.
+          </p>
+          <ul class="stats">
+            <li class="stat"><strong data-stat-readable></strong><span>datos obtenidos sin pedirte nada (de <span data-stat-total></span>)</span></li>
+            <li class="stat"><strong data-stat-protected></strong><span>señales con protección detectada</span></li>
+            <li class="stat"><strong data-stat-requests></strong><span>peticiones de red durante el escaneo</span></li>
+          </ul>
+        </article>
+      </div>
+
+      <nav id="category-nav" class="category-nav" aria-label="Secciones del resultado"></nav>
+
+      <article id="lies" class="panel lies-panel" aria-labelledby="lies-title">
+        <h3 id="lies-title" class="panel-title">Detector de mentiras</h3>
+        <div data-lies></div>
+      </article>
+
+      <div id="categories"></div>
+
+      <section id="tools" class="category tools" aria-labelledby="tools-title">
+        <h3 id="tools-title" class="category-title"><span class="category-icon" aria-hidden="true">🧪</span>Experimentos</h3>
+        <div class="tools-grid">
+          <article class="panel tool" aria-labelledby="stability-title">
+            <h4 id="stability-title" class="panel-title">Test de estabilidad</h4>
+            <div data-stability></div>
+          </article>
+          <article class="panel tool" aria-labelledby="compare-title">
+            <h4 id="compare-title" class="panel-title">Modo comparar</h4>
+            <div data-compare></div>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <section id="protect" class="protect wrap" aria-labelledby="protect-title">
+      <p class="eyebrow">Defiéndete</p>
+      <h2 id="protect-title" class="section-title">Cómo protegerte</h2>
+      <p class="protect-intro">
+        No se trata de esconder datos, sino de parecerte a mucha gente. Estas son las reglas de oro y lo que
+        puedes hacer en cada navegador.
+      </p>
+      <div class="protect-grid">
+        <article class="panel">
+          <h3 class="panel-title">Reglas de oro</h3>
+          <ol class="rules" data-rules></ol>
+        </article>
+        <article class="panel" data-tabs></article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-grid">
+      <section>
+        <h2>Privacidad</h2>
+        <p>
+          Esta página no envía nada a ningún servidor: no hay analítica, cookies, CDNs ni fuentes externas,
+          y una política de seguridad (CSP) prohíbe cualquier conexión. Puedes comprobarlo abriendo las
+          DevTools, en la pestaña Red.
+        </p>
+      </section>
+      <section>
+        <h2>En qué se basa</h2>
+        <ul>
+          <li><a href="https://coveryourtracks.eff.org/" rel="noopener noreferrer">EFF · Cover Your Tracks</a></li>
+          <li><a href="https://amiunique.org/" rel="noopener noreferrer">AmIUnique</a></li>
+          <li><a href="https://developer.mozilla.org/" rel="noopener noreferrer">MDN Web Docs</a></li>
+        </ul>
+      </section>
+      <section>
+        <h2>Código</h2>
+        <p>
+          HTML, CSS y JavaScript sin dependencias ni build.
+          <a href="https://github.com/Viiktor08/Ghostless" rel="noopener noreferrer">Código fuente en GitHub</a>.
+        </p>
+        <p class="psst" aria-hidden="true">psst: ↑ ↑ ↓ ↓ ← → ← → B A</p>
+      </section>
+    </div>
+  </footer>
+
+  <dialog id="how-dialog" class="dialog" aria-labelledby="how-title">
+    <div class="dialog-inner">
+      <div class="dialog-head">
+        <h2 id="how-title">¿Cómo se calcula la unicidad?</h2>
+        <button class="btn btn-small" type="button" data-close>Cerrar</button>
+      </div>
+      <p>
+        Sin un servidor con millones de huellas no se puede medir cuánta gente comparte la tuya. Lo que ves es
+        una <strong>estimación educativa</strong>, en tres pasos:
+      </p>
+      <ol>
+        <li>
+          Cada señal aporta unos <strong>bits de información</strong> orientativos, inspirados en estudios públicos
+          (Panopticlick de la EFF, AmIUnique, «Hiding in the Crowd»). Un valor común aporta menos que uno raro:
+          por ejemplo, un solo idioma puntúa menos que una lista de cuatro.
+        </li>
+        <li>
+          Las señales no son independientes (la pantalla va ligada al dispositivo, y este al User-Agent), así que
+          se ordenan de mayor a menor y cada una pesa menos que la anterior: ×<span data-decay></span> cada vez.
+          La suma directa daría <span data-naive-bits></span> bits; con este ajuste quedan
+          <strong><span data-final-bits></span> bits</strong>.
+        </li>
+        <li>
+          <em>n</em> bits equivalen a «1 de cada 2<sup><em>n</em></sup>». Con unos <span data-world-bits></span> bits
+          se podría distinguir a cada persona del planeta.
+        </li>
+      </ol>
+      <p>
+        Las señales bloqueadas o con ruido no suman: el ruido cambia en cada sesión y no sirve para seguirte.
+        Los estudios reales encuentran menos unicidad de la que sugieren las sumas simples, sobre todo en móviles:
+        tómalo como una idea del orden de magnitud.
+      </p>
+      <div class="breakdown-wrap">
+        <table class="breakdown">
+          <caption class="visually-hidden">Bits que aporta cada señal</caption>
+          <thead>
+            <tr><th scope="col">#</th><th scope="col">Señal</th><th scope="col">Bits</th><th scope="col">Peso</th><th scope="col">Aporta</th></tr>
+          </thead>
+          <tbody data-breakdown></tbody>
+        </table>
+      </div>
+    </div>
+  </dialog>
+  <dialog id="share-dialog" class="dialog" aria-labelledby="share-title">
+    <div class="dialog-inner">
+      <div class="dialog-head">
+        <h2 id="share-title">Tarjeta para compartir</h2>
+        <button class="btn btn-small" type="button" data-close>Cerrar</button>
+      </div>
+      <p>Solo lleva tu hash, la puntuación y los recuentos: ninguno de tus datos en crudo.</p>
+      <img class="share-preview" data-share-preview alt="Vista previa de la tarjeta con tu puntuación y tu hash" width="1200" height="630">
+      <div class="tool-actions">
+        <a class="btn" data-share-download download="ghostless-huella.png" href="#">Descargar PNG</a>
+        <button class="btn" type="button" data-share-native hidden>Compartir…</button>
+        <span class="copy-status" data-share-status aria-live="polite"></span>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="egg-dialog" class="dialog egg" aria-label="Terminal secreta">
+    <div class="terminal-bar">
+      <span class="terminal-dot" aria-hidden="true"></span>
+      <span class="terminal-dot" aria-hidden="true"></span>
+      <span class="terminal-dot" aria-hidden="true"></span>
+      <span class="terminal-title">visitante@ghostless: ~</span>
+      <button class="btn btn-small" type="button" data-close>Cerrar</button>
+    </div>
+    <div class="egg-output" data-egg-output role="log" aria-live="polite"></div>
+    <label class="egg-prompt">
+      <span aria-hidden="true">$</span>
+      <span class="visually-hidden">Orden</span>
+      <input type="text" data-egg-input autocomplete="off" autocapitalize="off" spellcheck="false">
+    </label>
+  </dialog>
+</body>
+</html>
