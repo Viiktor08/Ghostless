@@ -47,6 +47,58 @@ def scan(page, base_url: str) -> dict:
     return page.evaluate("JSON.parse(JSON.stringify(window.ghostless))")
 
 
+def check_extras_first(page, name: str, fails: list[str]) -> Path:
+    """Tras el primer escaneo: detector, estabilidad, tarjeta, exportar, terminal y pestañas."""
+    if not page.locator("[data-lies] .verdict").count():
+        fails.append("el detector de mentiras no muestra veredicto")
+
+    page.click("[data-stability-activate]")
+    if not page.locator("[data-stability] .tool-status.is-good").count():
+        fails.append("el test de estabilidad no se activa")
+
+    page.click("[data-share]")
+    page.wait_for_selector("[data-share-preview][src^='blob:']", timeout=10_000)
+    page.keyboard.press("Escape")
+
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+    with page.expect_download() as download:
+        page.click("[data-compare-export]")
+    exported = OUTPUT / f"{name}-export.json"
+    download.value.save_as(exported)
+    if json.loads(exported.read_text()).get("formato") != "ghostless-huella":
+        fails.append("el JSON exportado no tiene el formato esperado")
+
+    page.locator("#results-title").focus()
+    page.keyboard.type("help")
+    page.wait_for_selector("#egg-dialog[open]", timeout=5_000)
+    for command in ("whoami", "neofetch", "cat canvas", "mentiras", "sudo rm -rf /"):
+        page.fill("[data-egg-input]", command)
+        page.press("[data-egg-input]", "Enter")
+    output = page.inner_text("[data-egg-output]")
+    for expected in ("Eres ", "Unicidad:", '"id": "canvas"', "Buen intento"):
+        if expected not in output:
+            fails.append(f"la terminal secreta no muestra «{expected}»")
+    page.keyboard.press("Escape")
+
+    selected = page.locator("[role=tab][aria-selected=true]")
+    first_tab = selected.inner_text()
+    selected.focus()
+    page.keyboard.press("ArrowRight")
+    if page.locator("[role=tab][aria-selected=true]").inner_text() == first_tab:
+        fails.append("las pestañas de «Cómo protegerte» no responden a las flechas")
+    return exported
+
+
+def check_extras_second(page, exported: Path, fails: list[str]):
+    """Tras recargar: la estabilidad recuerda la huella y la comparación coincide."""
+    if not page.locator("[data-stability-result='same']").count():
+        fails.append("el test de estabilidad no reconoce la misma huella tras recargar")
+    page.set_input_files("[data-compare-input]", str(exported))
+    page.wait_for_selector("[data-compare-result]", timeout=5_000)
+    if page.get_attribute("[data-compare-result]", "data-compare-result") != "same":
+        fails.append("el modo comparar no reconoce su propia exportación")
+
+
 def short(value, width: int = 70) -> str:
     text = value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)
     return text if len(text) <= width else text[: width - 1] + "…"
@@ -98,13 +150,16 @@ def run_browser(pw, name: str, base_url: str, args) -> bool:
         page.wait_for_timeout(200)
         capturing = False
 
+    extras_fails: list[str] = []
     first = scan(page, base_url)
     if args.screenshot:
         page.wait_for_timeout(2000)  # deja terminar el medidor y la entrada de las tarjetas
         screenshot(f"{name}.png")
+    exported = check_extras_first(page, name, extras_fails)
     # Segunda pasada con movimiento reducido: prueba ese camino y que el hash no cambia.
     page.emulate_media(reduced_motion="reduce")
     second = scan(page, base_url)
+    check_extras_second(page, exported, extras_fails)
     if args.screenshot:
         page.set_viewport_size({"width": 390, "height": 844})
         page.wait_for_timeout(300)
@@ -135,6 +190,11 @@ def run_browser(pw, name: str, base_url: str, args) -> bool:
             line += f"  {short(r['error'] or r['value'])}"
         print(line)
 
+    problems.extend(f"extras: {f}" for f in extras_fails)
+    if not extras_fails:
+        print("  extras: detector, estabilidad, comparar, tarjeta, terminal y pestañas OK")
+    lies = first.get("lies", {})
+    print(f"  detector: {lies.get('verdict')} · " + "; ".join(f["title"] for f in lies.get("findings", [])))
     if first.get("requests"):
         problems.append(f"la página contó {first['requests']} peticiones de red durante el escaneo")
     if first["hash"] != second["hash"]:

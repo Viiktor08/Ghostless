@@ -78,11 +78,12 @@ function renderCard(result, bits, index) {
   return card;
 }
 
-export function renderCategoryNav(nav, results) {
-  const chips = CATEGORIES.filter((c) => results.some((r) => r.category === c.id)).map((c) =>
-    h('a', { class: 'chip', href: `#cat-${c.id}` }, h('span', { 'aria-hidden': 'true' }, c.icon), ` ${c.label}`),
-  );
-  nav.replaceChildren(...chips);
+const chip = (href, icon, label, extra = false) =>
+  h('a', { class: `chip${extra ? ' chip-extra' : ''}`, href }, h('span', { 'aria-hidden': 'true' }, icon), ` ${label}`);
+
+export function renderCategoryNav(nav, results, extraLinks = []) {
+  const chips = CATEGORIES.filter((c) => results.some((r) => r.category === c.id)).map((c) => chip(`#cat-${c.id}`, c.icon, c.label));
+  nav.replaceChildren(...extraLinks.map((l) => chip(l.href, l.icon, l.label, true)), ...chips);
 }
 
 export function renderCategories(container, results, score) {

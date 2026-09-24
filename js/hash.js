@@ -122,3 +122,14 @@ export async function fingerprintHash(results) {
   const components = fingerprintComponents(results);
   return { hash: await sha256Hex(stableStringify(components)), components };
 }
+
+// Huella corta de cada señal legible: permite decir QUÉ ha cambiado entre dos
+// escaneos sin guardar ni exportar los datos crudos completos.
+export async function signalFingerprints(results) {
+  const entries = await Promise.all(
+    results
+      .filter((r) => r.supported && !r.error)
+      .map(async (r) => [r.id, await shortHash(stableStringify(r.raw ?? r.value), 12)]),
+  );
+  return Object.fromEntries(entries);
+}

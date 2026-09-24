@@ -1,6 +1,6 @@
 import { h } from './dom.js';
 import { decrypt } from './effects.js';
-import { formatBits, formatOneIn } from './format.js';
+import { formatBits, oneInPhrase } from './format.js';
 import { DECAY, WORLD_BITS } from '../scoring.js';
 
 const HASH_GROUP = 16;
@@ -31,7 +31,7 @@ export function renderScore(root, score) {
   level.textContent = score.level.label;
   level.className = `level level-${score.level.id}`;
   root.querySelector('[data-level-text]').textContent = score.level.text;
-  root.querySelector('[data-one-in]').textContent = formatOneIn(score.oneIn);
+  root.querySelector('[data-one-in]').textContent = oneInPhrase(score.oneIn);
 }
 
 export function renderHash(root, hash, stableCount) {

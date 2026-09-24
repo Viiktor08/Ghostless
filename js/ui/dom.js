@@ -21,3 +21,6 @@ function build(el, attrs, children) {
 export const h = (tag, attrs, ...children) => build(document.createElement(tag), attrs, children);
 
 export const svg = (tag, attrs, ...children) => build(document.createElementNS(SVG_NS, tag), attrs, children);
+
+// replaceChildren sin los huecos (null/false) de los hijos condicionales.
+export const fill = (el, ...children) => el.replaceChildren(...children.flat().filter((c) => c != null && c !== false));

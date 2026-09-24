@@ -81,7 +81,7 @@
           <div data-gauge></div>
           <p class="level" data-level></p>
           <p class="level-text" data-level-text></p>
-          <p class="one-in">Tu combinación la compartiría aproximadamente <strong>1 de cada <span data-one-in></span></strong> navegadores.</p>
+          <p class="one-in">Tu combinación la compartiría aproximadamente <strong data-one-in></strong>.</p>
           <p class="disclaimer">
             Estimación educativa basada en estudios públicos, no una medida real.
             <button class="link-btn" type="button" data-open-how>¿Cómo se calcula esto?</button>
@@ -93,6 +93,7 @@
           <p class="hash" data-hash></p>
           <div class="hash-actions">
             <button class="btn btn-small" type="button" data-copy>Copiar hash</button>
+            <button class="btn btn-small" type="button" data-share>Tarjeta para compartir</button>
             <span class="copy-status" data-copy-status aria-live="polite"></span>
           </div>
           <p class="hash-note">
@@ -107,8 +108,44 @@
         </article>
       </div>
 
-      <nav id="category-nav" class="category-nav" aria-label="Categorías de señales"></nav>
+      <nav id="category-nav" class="category-nav" aria-label="Secciones del resultado"></nav>
+
+      <article id="lies" class="panel lies-panel" aria-labelledby="lies-title">
+        <h3 id="lies-title" class="panel-title">Detector de mentiras</h3>
+        <div data-lies></div>
+      </article>
+
       <div id="categories"></div>
+
+      <section id="tools" class="category tools" aria-labelledby="tools-title">
+        <h3 id="tools-title" class="category-title"><span class="category-icon" aria-hidden="true">🧪</span>Experimentos</h3>
+        <div class="tools-grid">
+          <article class="panel tool" aria-labelledby="stability-title">
+            <h4 id="stability-title" class="panel-title">Test de estabilidad</h4>
+            <div data-stability></div>
+          </article>
+          <article class="panel tool" aria-labelledby="compare-title">
+            <h4 id="compare-title" class="panel-title">Modo comparar</h4>
+            <div data-compare></div>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <section id="protect" class="protect wrap" aria-labelledby="protect-title">
+      <p class="eyebrow">Defiéndete</p>
+      <h2 id="protect-title" class="section-title">Cómo protegerte</h2>
+      <p class="protect-intro">
+        No se trata de esconder datos, sino de parecerte a mucha gente. Estas son las reglas de oro y lo que
+        puedes hacer en cada navegador.
+      </p>
+      <div class="protect-grid">
+        <article class="panel">
+          <h3 class="panel-title">Reglas de oro</h3>
+          <ol class="rules" data-rules></ol>
+        </article>
+        <article class="panel" data-tabs></article>
+      </div>
     </section>
   </main>
 
@@ -136,6 +173,7 @@
           HTML, CSS y JavaScript sin dependencias ni build.
           <a href="https://github.com/Viiktor08/Ghostless" rel="noopener noreferrer">Código fuente en GitHub</a>.
         </p>
+        <p class="psst" aria-hidden="true">psst: ↑ ↑ ↓ ↓ ← → ← → B A</p>
       </section>
     </div>
   </footer>
@@ -182,6 +220,37 @@
         </table>
       </div>
     </div>
+  </dialog>
+  <dialog id="share-dialog" class="dialog" aria-labelledby="share-title">
+    <div class="dialog-inner">
+      <div class="dialog-head">
+        <h2 id="share-title">Tarjeta para compartir</h2>
+        <button class="btn btn-small" type="button" data-close>Cerrar</button>
+      </div>
+      <p>Solo lleva tu hash, la puntuación y los recuentos: ninguno de tus datos en crudo.</p>
+      <img class="share-preview" data-share-preview alt="Vista previa de la tarjeta con tu puntuación y tu hash" width="1200" height="630">
+      <div class="tool-actions">
+        <a class="btn" data-share-download download="ghostless-huella.png" href="#">Descargar PNG</a>
+        <button class="btn" type="button" data-share-native hidden>Compartir…</button>
+        <span class="copy-status" data-share-status aria-live="polite"></span>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="egg-dialog" class="dialog egg" aria-label="Terminal secreta">
+    <div class="terminal-bar">
+      <span class="terminal-dot" aria-hidden="true"></span>
+      <span class="terminal-dot" aria-hidden="true"></span>
+      <span class="terminal-dot" aria-hidden="true"></span>
+      <span class="terminal-title">visitante@ghostless: ~</span>
+      <button class="btn btn-small" type="button" data-close>Cerrar</button>
+    </div>
+    <div class="egg-output" data-egg-output role="log" aria-live="polite"></div>
+    <label class="egg-prompt">
+      <span aria-hidden="true">$</span>
+      <span class="visually-hidden">Orden</span>
+      <input type="text" data-egg-input autocomplete="off" autocapitalize="off" spellcheck="false">
+    </label>
   </dialog>
 </body>
 </html>
