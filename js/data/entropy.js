@@ -32,6 +32,7 @@ export const BASE_BITS = {
   intlLocale: 2,
   intlFormats: 1,
   connection: 1.5,
+  codecs: 1.5,
   mediaDevices: 1,
   gamepads: 0.1,
   webrtc: 0.5,

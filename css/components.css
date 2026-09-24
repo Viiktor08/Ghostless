@@ -555,6 +555,16 @@ body::after {
 
 /* Hash */
 
+.hash-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.hash-panel .stats {
+  margin-top: auto;
+  padding-top: var(--space-5);
+}
+
 .hash {
   display: grid;
   grid-template-columns: repeat(2, max-content);

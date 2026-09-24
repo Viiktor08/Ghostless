@@ -23,7 +23,10 @@ from common import BROWSERS, OUTPUT, Watch, csp_violations, scan, short, start_s
 
 
 def check_extras_first(page, name: str, fails: list[str]) -> Path:
-    """Tras el primer escaneo: detector, estabilidad, tarjeta, exportar, terminal y pestañas."""
+    """Tras el primer escaneo: textos, detector, estabilidad, tarjeta, exportar, terminal y pestañas."""
+    missing = page.evaluate("[...document.querySelectorAll('.card')].filter((c) => c.querySelectorAll('.card-body h4').length < 3).map((c) => c.id)")
+    if missing:
+        fails.append(f"tarjetas sin texto educativo completo: {', '.join(missing)}")
     if not page.locator("[data-lies] .verdict").count():
         fails.append("el detector de mentiras no muestra veredicto")
 

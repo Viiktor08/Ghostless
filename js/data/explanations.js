@@ -136,6 +136,11 @@ export const EXPLANATIONS = {
     why: 'Cambia con la red, así que no entra en tu hash, pero ayuda a relacionar visitas hechas desde el mismo sitio.',
     protect: 'Solo la exponen los navegadores Chromium. Firefox y Safari no.',
   },
+  codecs: {
+    what: 'Qué formatos de audio y vídeo sabe reproducir tu navegador: H.264, HEVC, AV1, Opus, Dolby…',
+    why: 'Depende del navegador, del sistema y de las licencias que trae. HEVC o Dolby, por ejemplo, delatan el sistema operativo y a veces el hardware.',
+    protect: 'No se puede ocultar sin romper la reproducción de vídeo. Es una señal de bajo impacto por sí sola.',
+  },
   mediaDevices: {
     what: 'Cuántas cámaras, micrófonos y salidas de audio tienes, sin pedirte permiso.',
     why: 'Sin permiso no se ven los nombres y los navegadores modernos limitan el recuento, pero el número todavía suma.',
