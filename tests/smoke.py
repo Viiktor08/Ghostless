@@ -13,38 +13,13 @@ Uso (desde la raíz del repo):
 from __future__ import annotations
 
 import argparse
-import functools
 import json
 import sys
-import threading
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
-ROOT = Path(__file__).resolve().parent.parent
-OUTPUT = ROOT / "tests" / "output"
-BROWSERS = ("chromium", "firefox", "webkit")
-
-
-class QuietHandler(SimpleHTTPRequestHandler):
-    def log_message(self, *args):  # noqa: D401 - silencia el log de cada petición
-        pass
-
-
-def start_server() -> tuple[ThreadingHTTPServer, str]:
-    handler = functools.partial(QuietHandler, directory=str(ROOT))
-    server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
-    threading.Thread(target=server.serve_forever, daemon=True).start()
-    return server, f"http://127.0.0.1:{server.server_address[1]}/"
-
-
-def scan(page, base_url: str) -> dict:
-    page.goto(base_url)
-    page.click("#scan-btn")
-    # Selector y no wait_for_function: la CSP de la página prohíbe eval.
-    page.wait_for_selector("html[data-scan='done']", state="attached", timeout=30_000)
-    return page.evaluate("JSON.parse(JSON.stringify(window.ghostless))")
+from common import BROWSERS, OUTPUT, Watch, csp_violations, scan, short, start_server
 
 
 def check_extras_first(page, name: str, fails: list[str]) -> Path:
@@ -99,11 +74,6 @@ def check_extras_second(page, exported: Path, fails: list[str]):
         fails.append("el modo comparar no reconoce su propia exportación")
 
 
-def short(value, width: int = 70) -> str:
-    text = value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)
-    return text if len(text) <= width else text[: width - 1] + "…"
-
-
 def diff_components(a: dict, b: dict) -> list[str]:
     keys = sorted(set(a) | set(b))
     return [k for k in keys if json.dumps(a.get(k), sort_keys=True) != json.dumps(b.get(k), sort_keys=True)]
@@ -112,62 +82,33 @@ def diff_components(a: dict, b: dict) -> list[str]:
 def run_browser(pw, name: str, base_url: str, args) -> bool:
     browser = getattr(pw, name).launch()
     page = browser.new_page(viewport={"width": 1280, "height": 800})
+    watch = Watch(page, base_url)
     problems: list[str] = []
     warnings: list[str] = []
-    external: list[str] = []
-
-    capturing = False
-
-    def on_console(msg):
-        # Playwright inyecta un <style> al hacer capturas en WebKit y nuestra CSP
-        # lo bloquea: es ruido del test, no un error de la página.
-        if capturing and "Content Security Policy" in msg.text:
-            return
-        if msg.type == "error":
-            problems.append(f"consola: {msg.text}")
-        elif msg.type == "warning":
-            warnings.append(f"consola: {msg.text}")
-
-    def on_request(request):
-        url = request.url
-        if not (url.startswith(base_url) or url.startswith(("data:", "blob:"))):
-            external.append(url)
-
-    def on_response(response):
-        if response.status >= 400:
-            problems.append(f"HTTP {response.status}: {response.url}")
-
-    page.on("console", on_console)
-    page.on("pageerror", lambda err: problems.append(f"excepción: {err}"))
-    page.on("request", on_request)
-    page.on("response", on_response)
-
-    def screenshot(filename: str):
-        nonlocal capturing
-        OUTPUT.mkdir(parents=True, exist_ok=True)
-        capturing = True
-        page.screenshot(path=str(OUTPUT / filename), full_page=True)
-        page.wait_for_timeout(200)
-        capturing = False
 
     extras_fails: list[str] = []
     first = scan(page, base_url)
+    violations = csp_violations(page)
     if args.screenshot:
         page.wait_for_timeout(2000)  # deja terminar el medidor y la entrada de las tarjetas
-        screenshot(f"{name}.png")
+        watch.screenshot(f"{name}.png", full_page=True)
     exported = check_extras_first(page, name, extras_fails)
     # Segunda pasada con movimiento reducido: prueba ese camino y que el hash no cambia.
     page.emulate_media(reduced_motion="reduce")
     second = scan(page, base_url)
     check_extras_second(page, exported, extras_fails)
+    violations += csp_violations(page)
     if args.screenshot:
         page.set_viewport_size({"width": 390, "height": 844})
         page.wait_for_timeout(300)
-        screenshot(f"{name}-movil.png")
+        watch.screenshot(f"{name}-movil.png", full_page=True)
         width = page.evaluate("document.documentElement.scrollWidth")
         if width > 390:
             problems.append(f"scroll horizontal en móvil: {width}px de ancho")
     browser.close()
+    problems.extend(watch.problems)
+    warnings.extend(watch.warnings)
+    problems.extend(f"violación de CSP: {v}" for v in violations)
 
     results = first["results"]
     supported = [r for r in results if r["supported"] and not r["error"]]
@@ -204,7 +145,6 @@ def run_browser(pw, name: str, base_url: str, args) -> bool:
         warnings.append(f"collector {r['id']}: {r['error']}")
     for r in blocked:
         warnings.append(f"collector {r['id']} parece bloqueado/falseado")
-    problems.extend(f"petición externa: {url}" for url in external)
 
     OUTPUT.mkdir(parents=True, exist_ok=True)
     (OUTPUT / f"{name}.json").write_text(json.dumps(first, ensure_ascii=False, indent=2))

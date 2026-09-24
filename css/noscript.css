@@ -1,0 +1,14 @@
+/* Solo se carga sin JavaScript: el botón no haría nada, así que se oculta. */
+.btn-scan,
+.hero-note {
+  display: none;
+}
+
+.noscript {
+  max-width: 34rem;
+  margin: var(--space-5) auto 0;
+  padding: var(--space-4);
+  border: 1px solid var(--risk-mid);
+  border-radius: var(--radius);
+  font-size: var(--fs-md);
+}

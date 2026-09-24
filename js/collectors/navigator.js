@@ -93,7 +93,8 @@ export default [
       const points = navigator.maxTouchPoints;
       if (typeof points !== 'number') return { supported: false };
       const raw = { maxTouchPoints: points, touchEvent: 'ontouchstart' in window };
-      const value = points > 0 ? `sí · hasta ${points} dedos a la vez` : 'no';
+      let value = points > 0 ? `sí · hasta ${points} dedos a la vez` : 'no';
+      if (points === 0 && raw.touchEvent) value = 'eventos táctiles sin puntos de contacto (típico de una emulación)';
       return { supported: true, value, raw };
     },
   },

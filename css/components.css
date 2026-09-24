@@ -1357,7 +1357,6 @@ details[open] > summary > .card-more::after {
   color: var(--text-faint);
   font-family: var(--font-mono);
   font-size: var(--fs-xs);
-  opacity: 0.6;
 }
 
 /* ---------- Móvil y movimiento reducido ---------- */

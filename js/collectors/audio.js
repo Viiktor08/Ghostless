@@ -33,6 +33,21 @@ async function audioSignature() {
   return sum;
 }
 
+// Una señal constante de 0,5 debe renderizarse exacta en todos los motores.
+// Si no, alguien multiplica las muestras por un factor (Brave lo hace con un
+// valor fijo por sesión, así que dos pasadas seguidas coinciden igualmente).
+async function hasSampleNoise() {
+  const Offline = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const ctx = new Offline(1, 2048, 44100);
+  if (typeof ctx.createConstantSource !== 'function') return false;
+  const source = ctx.createConstantSource();
+  source.offset.value = 0.5;
+  source.connect(ctx.destination);
+  source.start(0);
+  const samples = (await renderBuffer(ctx)).getChannelData(0);
+  return samples.some((v) => v !== 0.5);
+}
+
 function waitForVoices(timeoutMs) {
   return new Promise((resolve) => {
     const finish = () => {
@@ -54,7 +69,9 @@ export default [
       if (!window.OfflineAudioContext && !window.webkitOfflineAudioContext) return { supported: false };
       const first = await audioSignature();
       const second = await audioSignature();
-      const noisy = first !== second;
+      const unstable = first !== second;
+      const sampleNoise = await hasSampleNoise();
+      const noisy = unstable || sampleNoise;
       const empty = first === 0;
       let value = String(first);
       if (empty) value = 'bloqueado: el audio sale en silencio';
@@ -64,7 +81,7 @@ export default [
         value,
         raw: String(first),
         blocked: noisy || empty,
-        details: { dosPasadasIguales: !noisy },
+        details: { dosPasadasIguales: !unstable, ruidoEnMuestras: sampleNoise },
       };
     },
   },
