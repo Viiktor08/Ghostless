@@ -1,0 +1,4 @@
+# Dependencias SOLO de desarrollo/pruebas (la web no tiene dependencias en runtime).
+# Instalar en el venv global:  ~/.venv/bin/pip install -r requirements.txt
+# Navegadores de Playwright:   ~/.venv/bin/playwright install chromium firefox webkit
+playwright==1.63.0

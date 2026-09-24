@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="dark">
+  <title>Ghostless · ¿Qué sabe la web de ti?</title>
+  <meta name="description" content="Descubre en vivo todo lo que cualquier web puede saber de tu navegador sin pedirte permiso. 100% en tu navegador: no se envía nada.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <main class="debug">
+    <h1>Ghostless</h1>
+    <p>Sin cookies. Sin permisos. Sin preguntar.</p>
+    <noscript><p>Esta demo necesita JavaScript: todo el análisis ocurre dentro de tu navegador.</p></noscript>
+    <button id="scan-btn" type="button">Escanéame</button>
+    <p id="status" aria-live="polite"></p>
+    <pre id="out"></pre>
+  </main>
+</body>
+</html>

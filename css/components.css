@@ -1,0 +1,24 @@
+/* Vista provisional de depuración (Fase 1). */
+.debug {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+}
+
+.debug button {
+  padding: var(--space-2) var(--space-4);
+  background: var(--accent-wash);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.debug pre {
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--fs-sm);
+  white-space: pre-wrap;
+}
