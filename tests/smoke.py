@@ -64,7 +64,13 @@ def run_browser(pw, name: str, base_url: str, args) -> bool:
     warnings: list[str] = []
     external: list[str] = []
 
+    capturing = False
+
     def on_console(msg):
+        # Playwright inyecta un <style> al hacer capturas en WebKit y nuestra CSP
+        # lo bloquea: es ruido del test, no un error de la página.
+        if capturing and "Content Security Policy" in msg.text:
+            return
         if msg.type == "error":
             problems.append(f"consola: {msg.text}")
         elif msg.type == "warning":
@@ -84,11 +90,28 @@ def run_browser(pw, name: str, base_url: str, args) -> bool:
     page.on("request", on_request)
     page.on("response", on_response)
 
+    def screenshot(filename: str):
+        nonlocal capturing
+        OUTPUT.mkdir(parents=True, exist_ok=True)
+        capturing = True
+        page.screenshot(path=str(OUTPUT / filename), full_page=True)
+        page.wait_for_timeout(200)
+        capturing = False
+
     first = scan(page, base_url)
     if args.screenshot:
-        OUTPUT.mkdir(parents=True, exist_ok=True)
-        page.screenshot(path=str(OUTPUT / f"{name}.png"), full_page=True)
+        page.wait_for_timeout(2000)  # deja terminar el medidor y la entrada de las tarjetas
+        screenshot(f"{name}.png")
+    # Segunda pasada con movimiento reducido: prueba ese camino y que el hash no cambia.
+    page.emulate_media(reduced_motion="reduce")
     second = scan(page, base_url)
+    if args.screenshot:
+        page.set_viewport_size({"width": 390, "height": 844})
+        page.wait_for_timeout(300)
+        screenshot(f"{name}-movil.png")
+        width = page.evaluate("document.documentElement.scrollWidth")
+        if width > 390:
+            problems.append(f"scroll horizontal en móvil: {width}px de ancho")
     browser.close()
 
     results = first["results"]
@@ -112,6 +135,8 @@ def run_browser(pw, name: str, base_url: str, args) -> bool:
             line += f"  {short(r['error'] or r['value'])}"
         print(line)
 
+    if first.get("requests"):
+        problems.append(f"la página contó {first['requests']} peticiones de red durante el escaneo")
     if first["hash"] != second["hash"]:
         changed = diff_components(first["components"], second["components"])
         problems.append(f"hash inestable al recargar; cambian: {', '.join(changed)}")

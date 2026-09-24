@@ -54,18 +54,79 @@ function render() {
   return canvas.toDataURL();
 }
 
-// Un bloque de color sólido debe leerse exactamente igual; si no, alguien
-// está añadiendo ruido a los píxeles (Brave, Safari, Firefox con protección...).
-function hasPixelNoise() {
-  const canvas = newCanvas(16, 16);
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  ctx.fillStyle = 'rgb(10, 200, 50)';
-  ctx.fillRect(0, 0, 16, 16);
-  const { data } = ctx.getImageData(0, 0, 16, 16);
-  for (let i = 0; i < data.length; i += 4) {
-    if (data[i] !== 10 || data[i + 1] !== 200 || data[i + 2] !== 50 || data[i + 3] !== 255) return true;
+const PNG_SIGNATURE = '\x89PNG\r\n\x1a\n';
+
+// Se queda solo con los fragmentos críticos del PNG (cabecera y píxeles).
+// Algunos navegadores añaden fragmentos auxiliares con bytes que cambian en
+// cada sesión (este Firefox mete uno llamado "deBG") aunque la imagen sea
+// idéntica, y eso no debe cambiar la huella.
+function pngPixels(dataURL) {
+  const binary = atob(dataURL.slice(dataURL.indexOf(',') + 1));
+  if (!binary.startsWith(PNG_SIGNATURE)) return { critical: dataURL, extra: [] };
+  let critical = '';
+  const extra = [];
+  let i = PNG_SIGNATURE.length;
+  while (i + 8 <= binary.length) {
+    const length =
+      ((binary.charCodeAt(i) << 24) | (binary.charCodeAt(i + 1) << 16) | (binary.charCodeAt(i + 2) << 8) | binary.charCodeAt(i + 3)) >>> 0;
+    const end = i + 12 + length;
+    const type = binary.slice(i + 4, i + 8);
+    // Bit 5 del primer byte del tipo a 0 (mayúscula) = fragmento crítico.
+    if ((binary.charCodeAt(i + 4) & 0x20) === 0) critical += binary.slice(i + 4, end);
+    else extra.push(type);
+    i = end;
   }
-  return false;
+  return { critical, extra };
+}
+
+// Franjas opacas de colores conocidos: deben leerse exactamente igual. Si no,
+// alguien está añadiendo ruido (Brave, Safari, Firefox con protección...).
+const PROBE_SIZE = 32;
+const STRIPES = [
+  [10, 200, 50],
+  [230, 40, 90],
+  [30, 90, 240],
+  [250, 250, 250],
+];
+
+function paintStripes(ctx) {
+  const width = PROBE_SIZE / STRIPES.length;
+  STRIPES.forEach(([r, g, b], i) => {
+    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    ctx.fillRect(i * width, 0, width, PROBE_SIZE);
+  });
+}
+
+function stripesIntact(ctx) {
+  const { data } = ctx.getImageData(0, 0, PROBE_SIZE, PROBE_SIZE);
+  const width = PROBE_SIZE / STRIPES.length;
+  for (let px = 0; px < PROBE_SIZE * PROBE_SIZE; px++) {
+    const [r, g, b] = STRIPES[Math.floor((px % PROBE_SIZE) / width)];
+    const o = px * 4;
+    if (data[o] !== r || data[o + 1] !== g || data[o + 2] !== b || data[o + 3] !== 255) return false;
+  }
+  return true;
+}
+
+// Ruido al leer píxeles (getImageData), como hace Brave.
+function hasPixelNoise() {
+  const ctx = newCanvas(PROBE_SIZE, PROBE_SIZE).getContext('2d', { willReadFrequently: true });
+  paintStripes(ctx);
+  return !stripesIntact(ctx);
+}
+
+// Ruido solo al exportar (toDataURL), como hace Firefox: el ruido es igual en
+// toda la sesión, así que dos pasadas coinciden. Se exporta, se decodifica de
+// vuelta y se comprueba píxel a píxel (PNG no pierde nada).
+async function hasExportNoise() {
+  const source = newCanvas(PROBE_SIZE, PROBE_SIZE);
+  paintStripes(source.getContext('2d'));
+  const img = new Image();
+  img.src = source.toDataURL();
+  await img.decode();
+  const ctx = newCanvas(PROBE_SIZE, PROBE_SIZE).getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(img, 0, 0);
+  return !stripesIntact(ctx);
 }
 
 export default [
@@ -79,26 +140,34 @@ export default [
 
       // La primera pasada puede salir distinta mientras se cargan fuentes de sistema.
       render();
-      const first = render();
-      const second = render();
-      const blank = newCanvas().toDataURL();
+      const image = render();
+      const first = pngPixels(image);
+      const second = pngPixels(render());
+      const blank = pngPixels(newCanvas().toDataURL());
 
-      const empty = first === blank;
-      const unstable = first !== second;
+      const empty = first.critical === blank.critical;
+      const unstable = first.critical !== second.critical;
       const pixelNoise = hasPixelNoise();
-      const hash = await sha256Hex(first);
+      const exportNoise = await hasExportNoise();
+      const hash = await sha256Hex(first.critical);
 
       let value = hash.slice(0, 16);
       if (empty) value = 'bloqueado: el navegador devuelve una imagen vacía';
-      else if (unstable || pixelNoise) value += ' · con ruido añadido';
+      else if (unstable || pixelNoise || exportNoise) value += ' · con ruido añadido';
 
       return {
         supported: true,
         value,
         raw: hash,
-        blocked: empty || unstable || pixelNoise,
-        preview: first,
-        details: { dosPasadasIguales: !unstable, ruidoEnPixeles: pixelNoise, imagenVacia: empty },
+        blocked: empty || unstable || pixelNoise || exportNoise,
+        preview: image,
+        details: {
+          dosPasadasIguales: !unstable,
+          ruidoAlLeerPixeles: pixelNoise,
+          ruidoAlExportar: exportNoise,
+          imagenVacia: empty,
+          fragmentosPngIgnorados: first.extra,
+        },
       };
     },
   },
