@@ -2,3 +2,4 @@
 # Instalar en el venv global:  ~/.venv/bin/pip install -r requirements.txt
 # Navegadores de Playwright:   ~/.venv/bin/playwright install chromium firefox webkit
 playwright==1.63.0
+axe-playwright-python==0.1.8

@@ -13,7 +13,7 @@
   /* Texto */
   --text: #d7e3ec;
   --text-dim: #93a4b3;
-  --text-faint: #6f8191;
+  --text-faint: #7a8c9c;
 
   /* Acento cian */
   --accent: #22d3ee;
@@ -26,7 +26,7 @@
   --risk-low: #34d399;
   --risk-mid: #fbbf24;
   --risk-high: #f87171;
-  --risk-none: #6f8191;
+  --risk-none: #7a8c9c;
 
   /* Tipografía */
   --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
