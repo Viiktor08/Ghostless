@@ -10,6 +10,10 @@
 </p>
 
 <p align="center">
+  <a href="https://viiktor08.github.io/Ghostless/"><strong>👻 Pruébalo en tu navegador →</strong></a>
+</p>
+
+<p align="center">
   <img src="assets/readme/escaneo.gif" width="880" alt="Animación del escaneo: una consola va revelando las señales del navegador y termina en el medidor de unicidad y el hash de la huella">
 </p>
 
@@ -150,13 +154,14 @@ Las pruebas usan [Playwright](https://playwright.dev/python/) con los tres motor
 headless:
 
 ```bash
-~/.venv/bin/pip install -r requirements.txt
-~/.venv/bin/playwright install chromium firefox webkit
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+playwright install chromium firefox webkit
 
-~/.venv/bin/python tests/smoke.py      # test de humo: escaneo, extras, hash estable, 0 peticiones, 0 violaciones de CSP
-~/.venv/bin/python tests/matrix.py     # matriz de pruebas (abajo)
-~/.venv/bin/python tests/audit.py      # Lighthouse + axe-core (necesita Node para npx)
-~/.venv/bin/python tools/readme_media.py  # regenera el GIF y las capturas de este README
+python tests/smoke.py          # test de humo: escaneo, extras, hash estable, 0 peticiones, 0 violaciones de CSP
+python tests/matrix.py         # matriz de pruebas (abajo)
+python tests/audit.py          # Lighthouse + axe-core (necesita Node para npx)
+python tools/readme_media.py   # regenera el GIF y las capturas de este README
 ```
 
 ### Matriz de pruebas

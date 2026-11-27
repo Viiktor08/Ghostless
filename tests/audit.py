@@ -4,8 +4,8 @@ interfaz ya escaneada (Lighthouse no pulsa el botón, así que no ve resultados)
 Requisitos: Node (para `npx`) y las dependencias de requirements.txt.
 
 Uso (desde la raíz del repo):
-    ~/.venv/bin/python tests/audit.py               # Lighthouse móvil y escritorio + axe en los 3 motores
-    ~/.venv/bin/python tests/audit.py --skip-lighthouse
+    python tests/audit.py                           # Lighthouse móvil y escritorio + axe en los 3 motores
+    python tests/audit.py --skip-lighthouse
 
 Los informes quedan en tests/output/ (lighthouse-*.report.html y .json).
 """

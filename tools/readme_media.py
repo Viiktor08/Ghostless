@@ -6,7 +6,7 @@ automatización, para que las capturas muestren lo que vería una persona y no
 Chrome normal en este mismo Mac (el headless añade "HeadlessChrome").
 
 Uso (desde la raíz del repo):
-    ~/.venv/bin/python tools/readme_media.py
+    python tools/readme_media.py
 """
 
 from __future__ import annotations

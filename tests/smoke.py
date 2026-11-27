@@ -5,9 +5,9 @@ en consola, no se hace ninguna petición fuera del propio sitio y el hash de la
 huella es estable al recargar.
 
 Uso (desde la raíz del repo):
-    ~/.venv/bin/python tests/smoke.py                      # chromium, firefox y webkit
-    ~/.venv/bin/python tests/smoke.py chromium -v          # un navegador, con valores
-    ~/.venv/bin/python tests/smoke.py --screenshot         # guarda capturas en tests/output/
+    python tests/smoke.py                      # chromium, firefox y webkit
+    python tests/smoke.py chromium -v          # un navegador, con valores
+    python tests/smoke.py --screenshot         # guarda capturas en tests/output/
 """
 
 from __future__ import annotations

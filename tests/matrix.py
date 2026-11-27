@@ -7,8 +7,8 @@ headless (Brave, uBlock) se simula inyectando el mismo comportamiento y se
 marca como simulado.
 
 Uso (desde la raíz del repo):
-    ~/.venv/bin/python tests/matrix.py             # todos los casos
-    ~/.venv/bin/python tests/matrix.py brave rfp   # solo los casos que contengan esos textos
+    python tests/matrix.py             # todos los casos
+    python tests/matrix.py brave rfp   # solo los casos que contengan esos textos
 
 Escribe el resultado en tests/output/matrix.md.
 """
